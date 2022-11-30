@@ -1,5 +1,5 @@
 - 👋 Hi, I’m @dmazunin
-- 👀 I’m interested in learning python, sql, c#.
+- 👀 I’m interested in learning python and c#.
 - 🌱 I’m currently learning how to automate with PS/bash/zsh
 - 💞️ I’m looking to collaborate on various projects, learn new languages. 
 - 📫 How to reach me mazunin@email.cz
