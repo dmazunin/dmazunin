@@ -1,7 +1,6 @@
 - 👋 Hi, I’m @dmazunin
-- 👀 I’m interested in learning python and c#.
-- 🌱 I’m currently learning how to automate with PS/bash/zsh
-- 💞️ I’m looking to collaborate on various projects, learn new languages. 
+- 👀 I’m learning python, swift and typescript.
+- 🌱 I’m currently learning how to automate with AI
 - 📫 How to reach me mazunin@email.cz
 
 <!---
