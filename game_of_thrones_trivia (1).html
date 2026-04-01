@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="slides-format" content="viewport">
+    <title>Game of Thrones — Lore & Trivia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-bg: #0c0a0e;
+            --color-bg-deep: #06050a;
+            --color-surface: #1a1525;
+            --color-text: #f0e8d8;
+            --color-text-secondary: #c8b89a;
+            --color-text-muted: #8a7560;
+            --color-accent-1: #C9A84C;
+            --color-accent-2: #8B1A1A;
+            --color-accent-3: #4a3060;
+            --color-glass-bg: rgba(255,255,255,0.05);
+            --color-glass-border: rgba(201,168,76,0.15);
+            --color-vignette: rgba(0,0,0,0.55);
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Crimson Pro', serif;
+        }
+    </style>
+    <style>
+        :root {
+            --color-bg: #0c0a0e;
+            --color-text: #f0e8d8;
+            --color-accent-1: #C9A84C;
+            --color-accent-2: #8B1A1A;
+            --color-accent-3: #4a3060;
+            --color-glass-bg: rgba(255,255,255,0.05);
+            --color-glass-border: rgba(201,168,76,0.15);
+            --color-vignette: rgba(0,0,0,0.55);
+            --glow-color-rgb: 201,168,76;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { background: var(--color-bg); margin: 0; }
+        body { font-family: 'Crimson Pro', serif; color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+        .deck { width: 100vw; height: 100vh; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
+        .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+        .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1100px; padding: clamp(1.5rem, 4vw, 4rem); }
+        .nav-controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: var(--color-glass-bg); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 40px; border: 1px solid var(--color-glass-border); }
+        .nav-btn { width: 36px; height: 36px; border: none; background: var(--color-glass-bg); color: var(--color-accent-1); border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+        .nav-btn:hover { background: rgba(201,168,76,0.2); }
+        .slide-dots { display: flex; gap: 6px; }
+        .slide-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(201,168,76,0.2); cursor: pointer; transition: background 0.3s, transform 0.3s; }
+        .slide-dots .dot.active { background: var(--color-accent-1); transform: scale(1.3); }
+        .slide-counter { font-size: 0.75rem; color: var(--color-text-muted); min-width: 36px; text-align: center; font-family: 'Crimson Pro', serif; }
+        .reveal { opacity: 0; transform: translateY(20px); }
+
+        .text-glow { text-shadow: 0 0 20px rgba(201,168,76,0.5), 0 0 40px rgba(201,168,76,0.2); }
+        @keyframes glow-pulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(201,168,76,0.5), 0 0 40px rgba(201,168,76,0.2); }
+            50% { text-shadow: 0 0 35px rgba(201,168,76,0.9), 0 0 70px rgba(201,168,76,0.4); }
+        }
+        .glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+
+        @keyframes float-slow {
+            0% { transform: translate(0,0) scale(1); } 25% { transform: translate(60px,-50px) scale(1.12); }
+            50% { transform: translate(-40px,40px) scale(0.9); } 75% { transform: translate(50px,20px) scale(1.08); }
+            100% { transform: translate(0,0) scale(1); }
+        }
+        @keyframes float-drift {
+            0% { transform: translate(0,0) scale(1) rotate(0deg); } 33% { transform: translate(-50px,-60px) scale(1.15) rotate(3deg); }
+            66% { transform: translate(40px,30px) scale(0.88) rotate(-2deg); } 100% { transform: translate(0,0) scale(1) rotate(0deg); }
+        }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+        .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-slow 12s ease-in-out infinite; }
+        .blob:nth-child(2) { animation: float-drift 16s ease-in-out infinite; }
+        .blob:nth-child(3) { animation: float-slow 20s ease-in-out infinite reverse; }
+
+        .slide::before {
+            content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-repeat:repeat; background-size:256px 256px; opacity:0.04; mix-blend-mode:overlay;
+        }
+        .slide::after {
+            content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+            background:radial-gradient(ellipse at center, transparent 45%, var(--color-vignette) 100%);
+        }
+
+        .divider { width:100%; height:1px; background:linear-gradient(to right,transparent,var(--color-accent-1),transparent); margin:0.75rem 0; opacity:0.4; }
+        .house-card { background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.2); border-radius:12px; padding:1.25rem 1.5rem; transition:transform 0.3s,box-shadow 0.3s; }
+        .house-card:hover { transform:translateY(-4px); box-shadow:0 8px 32px rgba(201,168,76,0.15); }
+
+        /* Question card — no answer shown */
+        .q-card { background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.15); border-radius:14px; padding:1.5rem 1.6rem; display:flex; flex-direction:column; gap:0.5rem; }
+        .q-number { display:inline-block; background:linear-gradient(135deg,var(--color-accent-2),#b02020); color:#f0e8d8; font-family:'Cinzel',serif; font-size:0.7rem; font-weight:700; border-radius:20px; padding:3px 12px; letter-spacing:0.05em; width:fit-content; }
+        .q-text { font-family:'Cinzel',serif; font-size:0.82rem; font-weight:600; color:var(--color-accent-1); line-height:1.5; }
+        .q-hint { font-size:0.78rem; color:var(--color-text-muted); font-style:italic; margin-top:0.2rem; }
+
+        /* Answer card */
+        .ans-card { background:rgba(255,255,255,0.04); border:1px solid rgba(201,168,76,0.15); border-radius:14px; padding:1.1rem 1.4rem; }
+        .ans-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.5rem; }
+        .ans-number { display:inline-block; background:linear-gradient(135deg,#1a4a1a,#2d6b2d); color:#b8e8b8; font-family:'Cinzel',serif; font-size:0.65rem; font-weight:700; border-radius:20px; padding:2px 10px; letter-spacing:0.05em; }
+        .ans-value { font-family:'Cinzel',serif; font-size:0.8rem; font-weight:700; color:#d4f0d4; }
+        .ans-detail { font-size:0.8rem; color:var(--color-text-secondary); line-height:1.4; }
+        .episode-badge { display:inline-block; background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.4); color:var(--color-accent-1); border-radius:20px; padding:2px 10px; font-size:0.68rem; font-family:'Crimson Pro',serif; letter-spacing:0.05em; margin-top:0.4rem; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.2s !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;pointer-events:none;"></div>
+<div class="deck">
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 1: TITLE
+══════════════════════════════════════════════════ -->
+<div class="slide slide-1 active" data-slide="1">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:600px;height:600px;top:-150px;right:-150px;background:var(--color-accent-1);opacity:0.1;"></div>
+        <div class="blob" style="width:400px;height:400px;bottom:-100px;left:-80px;background:var(--color-accent-2);opacity:0.12;"></div>
+        <div class="blob" style="width:250px;height:250px;top:45%;left:12%;background:var(--color-accent-3);opacity:0.1;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+        <div style="font-size:100px;margin-bottom:1rem;animation:float 3.5s ease-in-out infinite;" class="reveal">🐉</div>
+        <h1 class="font-display text-[clamp(2.2rem,5.5vw,4.5rem)] font-black tracking-tight mb-3 reveal"
+            style="background:linear-gradient(135deg,#C9A84C,#f0e8d8,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            GAME OF THRONES
+        </h1>
+        <div class="divider reveal"></div>
+        <p class="font-display text-[clamp(0.85rem,1.4vw,1.1rem)] tracking-[5px] uppercase text-text-muted mt-3 reveal">Lore &amp; Trivia — 8 Seasons of Westeros</p>
+        <p class="text-text-muted text-sm mt-4 reveal" style="font-style:italic;">"When you play the game of thrones, you win or you die." — Cersei Lannister, S1E07</p>
+        <div class="reveal mt-5" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <span style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:4px 16px;font-size:0.75rem;font-family:'Cinzel',serif;color:var(--color-accent-1);">18 Questions</span>
+            <span style="background:rgba(139,26,26,0.15);border:1px solid rgba(139,26,26,0.4);border-radius:20px;padding:4px 16px;font-size:0.75rem;font-family:'Cinzel',serif;color:#e8a0a0;">Answers at the End</span>
+            <span style="background:rgba(74,48,96,0.2);border:1px solid rgba(74,48,96,0.5);border-radius:20px;padding:4px 16px;font-size:0.75rem;font-family:'Cinzel',serif;color:#b8a0d8;">All 8 Seasons</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 2: THE GREAT HOUSES
+══════════════════════════════════════════════════ -->
+<div class="slide slide-2" data-slide="2">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:380px;height:380px;top:-80px;right:-80px;background:var(--color-accent-1);opacity:0.07;"></div>
+        <div class="blob" style="width:280px;height:280px;bottom:-60px;left:-40px;background:var(--color-accent-2);opacity:0.07;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-6">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">The Seven Kingdoms</p>
+            <h2 class="font-display text-[clamp(1.6rem,3.5vw,2.8rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#f0e8d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">The Great Houses of Westeros</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🦁</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Lannister</div>
+                <div class="text-xs text-text-secondary mt-1">"Hear Me Roar" / "A Lannister Always Pays His Debts"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Casterly Rock</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🐺</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Stark</div>
+                <div class="text-xs text-text-secondary mt-1">"Winter Is Coming"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Winterfell, The North</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🐉</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Targaryen</div>
+                <div class="text-xs text-text-secondary mt-1">"Fire and Blood"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Dragonstone (in exile)</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🦑</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Greyjoy</div>
+                <div class="text-xs text-text-secondary mt-1">"We Do Not Sow"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Pyke, Iron Islands</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🌹</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Tyrell</div>
+                <div class="text-xs text-text-secondary mt-1">"Growing Strong"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Highgarden, The Reach</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.8rem;margin-bottom:0.4rem;">🌙</div>
+                <div class="font-display text-sm font-bold" style="color:var(--color-accent-1);">House Baratheon</div>
+                <div class="text-xs text-text-secondary mt-1">"Ours is the Fury"</div>
+                <div class="text-xs text-text-muted mt-1">Seat: Storm's End / King's Landing</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 3: TRIVIA ROUND I — Questions only
+══════════════════════════════════════════════════ -->
+<div class="slide slide-3" data-slide="3">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:400px;height:400px;top:-100px;left:-100px;background:var(--color-accent-2);opacity:0.1;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-80px;right:-50px;background:var(--color-accent-1);opacity:0.07;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Trivia Round I</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.4rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#f0e8d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">The Iron Throne — Seasons 1–2</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="q-card reveal">
+                <span class="q-number">Q1</span>
+                <p class="q-text">How many direwolf pups do the Stark children find in the pilot episode?</p>
+                <p class="q-hint">Hint: Think of the number of Stark children — including the bastard.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q2</span>
+                <p class="q-text">What does "Valar Morghulis" mean in High Valyrian, and what is the traditional reply?</p>
+                <p class="q-hint">Hint: It is the creed of the Faceless Men of Braavos.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q3</span>
+                <p class="q-text">Who said: "Never forget what you are. The rest of the world will not. Wear it like armor and it can never be used to hurt you."</p>
+                <p class="q-hint">Hint: Said to Jon Snow on the road to the Wall in Season 1.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q4</span>
+                <p class="q-text">Where and how were Daenerys's three dragon eggs finally hatched?</p>
+                <p class="q-hint">Hint: Fire plays a central role — and Dany walked through the flames.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 4: LORE — Dragons & Magic
+══════════════════════════════════════════════════ -->
+<div class="slide slide-4" data-slide="4">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:450px;height:450px;top:-120px;right:-120px;background:var(--color-accent-2);opacity:0.12;"></div>
+        <div class="blob" style="width:320px;height:320px;bottom:-80px;left:-60px;background:var(--color-accent-1);opacity:0.08;"></div>
+        <div class="blob" style="width:200px;height:200px;top:50%;left:45%;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Deep Lore</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.5rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#f0e8d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dragons, Magic &amp; the Supernatural</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">🐉</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">Drogon</div>
+                <div class="text-xs text-text-secondary mt-1">Named after Khal Drogo. The largest dragon. Carried Daenerys from the Meereen fighting pits. <span class="episode-badge">S5E09</span></div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">🔥</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">Rhaegal &amp; Viserion</div>
+                <div class="text-xs text-text-secondary mt-1">Viserion was killed by the Night King's ice spear and reanimated as an undead ice dragon. <span class="episode-badge">S7E06</span></div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">❄️</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">White Walkers</div>
+                <div class="text-xs text-text-secondary mt-1">Created by the Children of the Forest. Killed only by dragonglass or Valyrian steel. <span class="episode-badge">S6E05</span></div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">⚔️</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">Valyrian Steel</div>
+                <div class="text-xs text-text-secondary mt-1">Forged in dragonfire in Old Valyria. Longclaw (Jon), Heartsbane (Tarlys), Oathkeeper (Brienne) are key blades.</div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">🧿</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">Warging</div>
+                <div class="text-xs text-text-secondary mt-1">Entering the minds of animals. Bran Stark is the most powerful warg, becoming the Three-Eyed Raven. <span class="episode-badge">S3E01</span></div>
+            </div>
+            <div class="house-card reveal">
+                <div style="font-size:1.6rem;">🌳</div>
+                <div class="font-display text-xs font-bold mt-1" style="color:var(--color-accent-1);">Weirwood Trees</div>
+                <div class="text-xs text-text-secondary mt-1">Sacred heart trees of the Old Gods. The Night King was destroyed at the Winterfell weirwood. <span class="episode-badge">S8E03</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 5: TRIVIA ROUND II — Questions only
+══════════════════════════════════════════════════ -->
+<div class="slide slide-5" data-slide="5">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:500px;height:500px;top:-130px;right:-130px;background:var(--color-accent-2);opacity:0.13;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.09;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Trivia Round II</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.4rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#8B1A1A,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Deaths, Betrayals &amp; Red Weddings</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="q-card reveal">
+                <span class="q-number">Q5</span>
+                <p class="q-text">Who delivered the fatal stab to Robb Stark at the Red Wedding, and what famous line accompanied it?</p>
+                <p class="q-hint">Hint: He was a lord who betrayed the Starks in exchange for power over the North.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q6</span>
+                <p class="q-text">How was King Joffrey Baratheon killed at his own wedding, and who orchestrated it?</p>
+                <p class="q-hint">Hint: The method was hidden in his wine goblet. Two schemers from different houses.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q7</span>
+                <p class="q-text">What dangerous substance did Tyrion deploy against Stannis's fleet at the Battle of the Blackwater?</p>
+                <p class="q-hint">Hint: An alchemical green flame that cannot be extinguished by water.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q8</span>
+                <p class="q-text">Which house was given control of the North as a reward after the Red Wedding?</p>
+                <p class="q-hint">Hint: Their sigil is a flayed man. They later became infamous for Ramsay.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 6: ARYA STARK LORE + Questions
+══════════════════════════════════════════════════ -->
+<div class="slide slide-6" data-slide="6">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:350px;height:350px;top:-80px;left:-60px;background:var(--color-accent-3);opacity:0.1;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-80px;right:-60px;background:var(--color-accent-1);opacity:0.07;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Lore Spotlight</p>
+            <h2 class="font-display text-[clamp(1.4rem,3vw,2.4rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#f0e8d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Arya Stark: A Girl Has No Name</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1.5rem;align-items:start;">
+            <div>
+                <div class="house-card reveal" style="margin-bottom:0.75rem;">
+                    <div class="font-display text-xs font-bold" style="color:var(--color-accent-1);">The Kill List — Recited Nightly</div>
+                    <ul style="margin-top:0.5rem;list-style:none;padding:0;display:flex;flex-direction:column;gap:0.3rem;">
+                        <li class="text-xs text-text-secondary">⚔️ Cersei Lannister</li>
+                        <li class="text-xs text-text-secondary">⚔️ Walder Frey <span class="episode-badge">killed S6E10</span></li>
+                        <li class="text-xs text-text-secondary">⚔️ The Mountain</li>
+                        <li class="text-xs text-text-secondary">⚔️ Melisandre</li>
+                        <li class="text-xs text-text-secondary">⚔️ Beric Dondarrion</li>
+                    </ul>
+                </div>
+                <div class="house-card reveal">
+                    <div class="font-display text-xs font-bold" style="color:var(--color-accent-1);">Training: The Faceless Men</div>
+                    <p class="text-xs text-text-secondary mt-1">Trained at the House of Black and White in Braavos. Mastered the art of wearing faces. <span class="episode-badge">S5–S6</span></p>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div class="q-card reveal">
+                    <span class="q-number">Q9</span>
+                    <p class="q-text">Who killed the Night King, and with what weapon?</p>
+                    <p class="q-hint">Hint: A young Stark girl. The weapon was a Valyrian steel dagger with a storied history.</p>
+                </div>
+                <div class="q-card reveal">
+                    <span class="q-number">Q10</span>
+                    <p class="q-text">Needle, Longclaw, and Oathkeeper are all famous swords — what do they have in common and who wields each?</p>
+                    <p class="q-hint">Hint: Not all three are Valyrian steel. One was gifted by a Lord Commander.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 7: TRIVIA ROUND III — Questions only
+══════════════════════════════════════════════════ -->
+<div class="slide slide-7" data-slide="7">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:420px;height:420px;top:-100px;right:-80px;background:#3a6080;opacity:0.12;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-60px;left:-50px;background:var(--color-accent-1);opacity:0.07;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Trivia Round III</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.4rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#aad4f0,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">The Wall, Jon Snow &amp; Beyond</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="q-card reveal">
+                <span class="q-number">Q11</span>
+                <p class="q-text">Who is famous for saying "You know nothing, Jon Snow," and what happened to them?</p>
+                <p class="q-hint">Hint: A Wildling woman from beyond the Wall who became Jon's lover.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q12</span>
+                <p class="q-text">How was Jon Snow resurrected after being murdered by his own Night's Watch brothers?</p>
+                <p class="q-hint">Hint: A Red Priestess performed a ritual involving washing and incantation.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q13</span>
+                <p class="q-text">What is the origin story of Hodor's name, and how did he ultimately die?</p>
+                <p class="q-hint">Hint: It happened in a cave, through Bran's warging ability — past and present collided.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q14</span>
+                <p class="q-text">What army arrived to save Jon Snow at the last moment in the Battle of the Bastards?</p>
+                <p class="q-hint">Hint: Sansa had secretly contacted their lord — who also had feelings for her mother.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 8: STATS
+══════════════════════════════════════════════════ -->
+<div class="slide slide-8" data-slide="8">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:500px;height:500px;top:-120px;right:-100px;background:var(--color-accent-1);opacity:0.08;"></div>
+        <div class="blob" style="width:350px;height:350px;bottom:-90px;left:-70px;background:var(--color-accent-2);opacity:0.10;"></div>
+        <div class="blob" style="width:220px;height:220px;top:40%;left:40%;background:var(--color-accent-3);opacity:0.07;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">By The Numbers</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.5rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#f0e8d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Game of Thrones — The Series in Stats</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.9rem;margin-bottom:1rem;">
+            <div class="house-card reveal text-center">
+                <div class="font-display text-[2rem] font-black glow-pulse" style="color:var(--color-accent-1);">8</div>
+                <div class="text-xs text-text-muted uppercase tracking-wider mt-1">Seasons</div>
+                <div class="text-[0.7rem] text-text-secondary mt-1">2011–2019</div>
+            </div>
+            <div class="house-card reveal text-center">
+                <div class="font-display text-[2rem] font-black glow-pulse" style="color:var(--color-accent-1);">73</div>
+                <div class="text-xs text-text-muted uppercase tracking-wider mt-1">Episodes</div>
+                <div class="text-[0.7rem] text-text-secondary mt-1">Across 8 seasons</div>
+            </div>
+            <div class="house-card reveal text-center">
+                <div class="font-display text-[2rem] font-black glow-pulse" style="color:var(--color-accent-1);">58</div>
+                <div class="text-xs text-text-muted uppercase tracking-wider mt-1">Emmy Awards</div>
+                <div class="text-[0.7rem] text-text-secondary mt-1">Most by a drama</div>
+            </div>
+            <div class="house-card reveal text-center">
+                <div class="font-display text-[2rem] font-black glow-pulse" style="color:var(--color-accent-1);">3</div>
+                <div class="text-xs text-text-muted uppercase tracking-wider mt-1">Dragons</div>
+                <div class="text-[0.7rem] text-text-secondary mt-1">Drogon, Rhaegal, Viserion</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.9rem;">
+            <div class="house-card reveal">
+                <div class="font-display text-xs font-bold" style="color:var(--color-accent-1);">Most Appearances</div>
+                <p class="text-sm text-text-secondary mt-1">Tyrion Lannister appeared in <strong>67</strong> of 73 episodes — more than any other character.</p>
+            </div>
+            <div class="house-card reveal">
+                <div class="font-display text-xs font-bold" style="color:var(--color-accent-1);">Budget Growth</div>
+                <p class="text-sm text-text-secondary mt-1">From <strong>$6M</strong> per episode (S1) to over <strong>$15M</strong> per episode (S8).</p>
+            </div>
+            <div class="house-card reveal">
+                <div class="font-display text-xs font-bold" style="color:var(--color-accent-1);">Filming Locations</div>
+                <p class="text-sm text-text-secondary mt-1">Shot across <strong>6 countries</strong>: UK, Croatia, Iceland, Spain, Morocco &amp; Canada.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 9: TRIVIA ROUND IV — Questions only
+══════════════════════════════════════════════════ -->
+<div class="slide slide-9" data-slide="9">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:400px;height:400px;top:-80px;left:-80px;background:var(--color-accent-2);opacity:0.12;"></div>
+        <div class="blob" style="width:320px;height:320px;bottom:-80px;right:-60px;background:var(--color-accent-1);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-5">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase text-text-muted reveal">Trivia Round IV</p>
+            <h2 class="font-display text-[clamp(1.5rem,3vw,2.4rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#C9A84C,#8B1A1A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">The Final Season — Endings &amp; Legacies</h2>
+            <div class="divider reveal"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="q-card reveal">
+                <span class="q-number">Q15</span>
+                <p class="q-text">Who destroyed the Iron Throne, how, and what did they do afterward?</p>
+                <p class="q-hint">Hint: It wasn't a human — and it acted out of apparent grief.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q16</span>
+                <p class="q-text">Who was ultimately crowned ruler of Westeros in the series finale, and how were they chosen?</p>
+                <p class="q-hint">Hint: Not the most obvious candidate — chosen at a council gathering in King's Landing.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q17</span>
+                <p class="q-text">What explosive act did Cersei commit in the Season 6 finale to destroy all her enemies at once?</p>
+                <p class="q-hint">Hint: It involved the Great Sept and an alchemical substance stockpiled beneath the city.</p>
+            </div>
+            <div class="q-card reveal">
+                <span class="q-number">Q18</span>
+                <p class="q-text">What is Jon Snow's true name and birthright, and who are his real parents?</p>
+                <p class="q-hint">Hint: His parentage was revealed via Bran's visions — he has a stronger claim to the throne than Daenerys.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 10: ANSWER KEY — Part 1 (Q1–Q9)
+══════════════════════════════════════════════════ -->
+<div class="slide slide-10" data-slide="10">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:400px;height:400px;top:-100px;right:-80px;background:#1a4a1a;opacity:0.15;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-70px;left:-60px;background:var(--color-accent-1);opacity:0.07;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+        <div class="text-center mb-4">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase reveal" style="color:#6dbf6d;">Answer Key</p>
+            <h2 class="font-display text-[clamp(1.4rem,3vw,2.3rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#6dbf6d,#b8e8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Answers — Questions 1 to 9</h2>
+            <div class="divider reveal" style="background:linear-gradient(to right,transparent,#6dbf6d,transparent);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A1</span><span class="ans-value">6 Direwolf Pups</span></div>
+                <p class="ans-detail">One for each Stark child — plus an albino runt for Jon Snow.</p>
+                <span class="episode-badge">S1E01 — Winter Is Coming</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A2</span><span class="ans-value">"All Men Must Die"</span></div>
+                <p class="ans-detail">The reply is "Valar Dohaeris" — All men must serve. Creed of the Faceless Men.</p>
+                <span class="episode-badge">S2E10 — Valar Morghulis</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A3</span><span class="ans-value">Tyrion Lannister</span></div>
+                <p class="ans-detail">Advising Jon Snow on self-acceptance on the road to the Wall.</p>
+                <span class="episode-badge">S1E01 — Winter Is Coming</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A4</span><span class="ans-value">Khal Drogo's Funeral Pyre</span></div>
+                <p class="ans-detail">Dany walked into the flames and emerged unburnt with 3 hatchlings.</p>
+                <span class="episode-badge">S1E10 — Fire and Blood</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A5</span><span class="ans-value">Roose Bolton</span></div>
+                <p class="ans-detail">"The Lannisters send their regards." Walder Frey orchestrated the massacre.</p>
+                <span class="episode-badge">S3E09 — The Rains of Castamere</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A6</span><span class="ans-value">Poison — "The Strangler"</span></div>
+                <p class="ans-detail">Orchestrated by Olenna Tyrell and Littlefinger, hidden in his wine goblet.</p>
+                <span class="episode-badge">S4E02 — The Lion and the Rose</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A7</span><span class="ans-value">Wildfire</span></div>
+                <p class="ans-detail">The alchemical green fire ignited Stannis's fleet in Blackwater Bay.</p>
+                <span class="episode-badge">S2E09 — Blackwater</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A8</span><span class="ans-value">House Bolton</span></div>
+                <p class="ans-detail">Roose Bolton named Warden of the North by the Lannisters for his betrayal.</p>
+                <span class="episode-badge">S3E10 — Mhysa</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A9</span><span class="ans-value">Arya Stark</span></div>
+                <p class="ans-detail">Used the Valyrian steel catspaw dagger at the Winterfell weirwood tree.</p>
+                <span class="episode-badge">S8E03 — The Long Night</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 11: ANSWER KEY — Part 2 (Q10–Q18)
+══════════════════════════════════════════════════ -->
+<div class="slide slide-11" data-slide="11">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:450px;height:450px;top:-110px;left:-90px;background:#1a4a1a;opacity:0.15;"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-70px;right:-60px;background:var(--color-accent-1);opacity:0.07;"></div>
+    </div>
+    <div class="content">
+        <div class="text-center mb-4">
+            <p class="font-display text-[0.7rem] tracking-[6px] uppercase reveal" style="color:#6dbf6d;">Answer Key</p>
+            <h2 class="font-display text-[clamp(1.4rem,3vw,2.3rem)] font-bold reveal"
+                style="background:linear-gradient(135deg,#6dbf6d,#b8e8b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Answers — Questions 10 to 18</h2>
+            <div class="divider reveal" style="background:linear-gradient(to right,transparent,#6dbf6d,transparent);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A10</span><span class="ans-value">Named Swords</span></div>
+                <p class="ans-detail">Needle (Arya — NOT Valyrian), Longclaw (Jon — gift from Mormont), Oathkeeper (Brienne — forged from Ned's Ice).</p>
+                <span class="episode-badge">S1 / S3 / S4</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A11</span><span class="ans-value">Ygritte</span></div>
+                <p class="ans-detail">The Wildling woman Jon loved. She died in his arms at Castle Black, shot by an arrow during the battle.</p>
+                <span class="episode-badge">S3E05 / S4E09</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A12</span><span class="ans-value">Melisandre's Ritual</span></div>
+                <p class="ans-detail">The Red Priestess washed his wounds and chanted. He was stabbed 5 times by Alliser Thorne's men.</p>
+                <span class="episode-badge">S5E10 / S6E02</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A13</span><span class="ans-value">"Hold the Door"</span></div>
+                <p class="ans-detail">Young Wylis's mind shattered hearing "hold the door" through Bran's warg. He died sacrificing himself at the cave.</p>
+                <span class="episode-badge">S6E05 — The Door</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A14</span><span class="ans-value">Knights of the Vale</span></div>
+                <p class="ans-detail">Led by Littlefinger, summoned secretly by Sansa. Arrived just as Jon's forces were surrounded.</p>
+                <span class="episode-badge">S6E09 — Battle of the Bastards</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A15</span><span class="ans-value">Drogon (Dragon)</span></div>
+                <p class="ans-detail">Melted the Iron Throne with dragonfire after Daenerys was killed by Jon Snow, then flew east with her body.</p>
+                <span class="episode-badge">S8E06 — The Iron Throne</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A16</span><span class="ans-value">Bran Stark</span></div>
+                <p class="ans-detail">"King Bran the Broken" — elected by the Great Council of lords at the Dragonpit in King's Landing.</p>
+                <span class="episode-badge">S8E06 — The Iron Throne</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A17</span><span class="ans-value">Wildfire — The Great Sept</span></div>
+                <p class="ans-detail">Ignited wildfire caches beneath the Great Sept of Baelor, killing the Tyrells, High Sparrow &amp; Faith Militant.</p>
+                <span class="episode-badge">S6E10 — The Winds of Winter</span>
+            </div>
+            <div class="ans-card reveal">
+                <div class="ans-header"><span class="ans-number">A18</span><span class="ans-value">Aegon Targaryen</span></div>
+                <p class="ans-detail">Son of Rhaegar Targaryen &amp; Lyanna Stark (secretly wed). Rightful heir to the Iron Throne over Daenerys.</p>
+                <span class="episode-badge">S7E07 / S8E01</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 12: CLOSING
+══════════════════════════════════════════════════ -->
+<div class="slide slide-12" data-slide="12">
+    <div class="gradient-mesh">
+        <div class="blob" style="width:600px;height:600px;top:-150px;right:-150px;background:var(--color-accent-1);opacity:0.12;"></div>
+        <div class="blob" style="width:450px;height:450px;bottom:-120px;left:-100px;background:var(--color-accent-2);opacity:0.14;"></div>
+        <div class="blob" style="width:300px;height:300px;top:40%;left:35%;background:var(--color-accent-3);opacity:0.1;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+        <div style="font-size:90px;animation:float 3.5s ease-in-out infinite;" class="reveal">⚔️</div>
+        <h1 class="font-display text-[clamp(2rem,5vw,4rem)] font-black tracking-tight mt-3 mb-3 reveal"
+            style="background:linear-gradient(135deg,#C9A84C,#f0e8d8,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            Valar Morghulis
+        </h1>
+        <div class="divider reveal"></div>
+        <p class="text-text-secondary text-lg mt-4 reveal" style="font-style:italic;">"All men must die — but we are not men."</p>
+        <p class="text-text-muted text-sm mt-2 reveal">— Daenerys Targaryen, Season 3</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem;" class="reveal">
+            <div class="house-card text-center">
+                <div class="text-xs text-text-muted uppercase tracking-widest">Questions</div>
+                <div class="font-display text-lg font-bold mt-1" style="color:var(--color-accent-1);">18 Total</div>
+            </div>
+            <div class="house-card text-center">
+                <div class="text-xs text-text-muted uppercase tracking-widest">Seasons Covered</div>
+                <div class="font-display text-lg font-bold mt-1" style="color:var(--color-accent-1);">All 8 Seasons</div>
+            </div>
+            <div class="house-card text-center">
+                <div class="text-xs text-text-muted uppercase tracking-widest">Answers Found On</div>
+                <div class="font-display text-lg font-bold mt-1" style="color:#6dbf6d;">Slides 10 &amp; 11</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end .deck -->
+
+<!-- NAVIGATION -->
+<div class="nav-controls">
+    <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
+    <div class="slide-dots" id="dots"></div>
+    <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
+    <span class="slide-counter" id="counter">1 / 12</span>
+</div>
+
+<script>
+    let current = 1;
+    const total = document.querySelectorAll('.slide').length;
+    const dotsContainer = document.getElementById('dots');
+    const counter = document.getElementById('counter');
+    for (let i = 1; i <= total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 1 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+    counter.textContent = '1 / ' + total;
+
+    function goToSlide(n) {
+        const prev = document.querySelector('.slide.active');
+        const next = document.querySelector('.slide[data-slide="' + n + '"]');
+        if (prev) prev.classList.remove('active');
+        if (next) { next.classList.add('active'); animateSlide(next); }
+        current = n; updateNav();
+    }
+    function changeSlide(dir) {
+        let next = current + dir;
+        if (next < 1) next = total;
+        if (next > total) next = 1;
+        goToSlide(next);
+    }
+    function updateNav() {
+        document.querySelectorAll('.dot').forEach((d, i) => { d.classList.toggle('active', i + 1 === current); });
+        counter.textContent = current + ' / ' + total;
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+    });
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+    document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+
+    function animateSlide(slide) {
+        slide.querySelectorAll('.reveal').forEach((el, i) => {
+            el.style.transition = 'none';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.offsetHeight;
+            const delay = i * 0.065;
+            el.style.transition = 'opacity 0.35s ease ' + delay + 's, transform 0.35s ease ' + delay + 's';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0px)';
+        });
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        const spotlight = document.querySelector('.mouse-spotlight');
+        if (spotlight) {
+            spotlight.style.background = 'radial-gradient(600px circle at ' + e.clientX + 'px ' + e.clientY + 'px, rgba(201,168,76,0.05), transparent 40%)';
+        }
+    });
+
+    window.initParticles = function(canvas, options) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+        const interactive = options.interactive !== false;
+        const count = options.count || (interactive ? 50 : 18);
+        let mx = -1000, my = -1000;
+        const particles = Array.from({ length: count }, () => ({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+            size: Math.random() * 2 + 0.8, alpha: Math.random() * 0.3 + 0.1
+        }));
+        if (interactive) {
+            canvas.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mx = e.clientX - rect.left; my = e.clientY - rect.top; });
+            canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+        }
+        (function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                if (interactive) { const dx = p.x - mx, dy = p.y - my, dist = Math.sqrt(dx*dx+dy*dy); if (dist < 120) { const force = (120-dist)/120*2; p.vx += (dx/dist)*force*0.1; p.vy += (dy/dist)*force*0.1; } }
+                p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(201,168,76,' + p.alpha + ')'; ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        })();
+    };
+    document.querySelectorAll('.particle-canvas').forEach(c => window.initParticles(c, { interactive: true, count: 50 }));
+    document.querySelectorAll('.particle-canvas-ambient').forEach(c => window.initParticles(c, { interactive: false, count: 18 }));
+
+    try { animateSlide(document.querySelector('.slide.active')); } catch(e) { console.warn(e); }
+</script>
+</body>
+</html>
